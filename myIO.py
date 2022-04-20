@@ -94,8 +94,9 @@ def timer(func):
     # 函数计时器
     def wrapper(*args, **kw):
         local_time = time.time()
+        print(f'{func.__name__} is running')
         res=func(*args, **kw)
-        print('current Function [%s] run time is %.2fs' % (func.__name__, time.time() - local_time))
+        print('[%s] run time is %.2fs\n' % (func.__name__, time.time() - local_time))
         return res
 
     return wrapper

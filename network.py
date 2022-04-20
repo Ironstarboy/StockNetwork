@@ -24,16 +24,7 @@ def QView():
     plt.show()
 QView()
 
-def getStockCdName(mkt):
-    sql='''select distinct s.stkcd,c.stkname from stockprice s,coinfo c
-            where s.markettype={} 
-            and s.stkcd=c.stkcd
-            group by s.stkcd
-            having count(s.Trdsta=1)>=200'''.format(mkt)
-    cdName=sqlCmd.select(sql)
-    name=[i[1] for i in cdName]
-    cd=[i[0] for i in cdName]
-    return cd,name
+
 
 
 def getNodes():
