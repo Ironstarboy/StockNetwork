@@ -49,7 +49,7 @@ def delFileByDir(dir):
 
 
 def getFileName(filePath):
-    """ 输入的文件名，输出文件名以及后缀 """
+    """ 输入文件路径，输出文件名以及后缀 """
     return os.path.basename(filePath)
 
 # 可递归获取置顶目录下的文件路径
@@ -94,9 +94,10 @@ def timer(func):
     # 函数计时器
     def wrapper(*args, **kw):
         local_time = time.time()
-        print(f'{func.__name__} is running')
+        print(f'[{func.__name__}] is running',end=': ')
         res=func(*args, **kw)
-        print('[%s] run time is %.2fs\n' % (func.__name__, time.time() - local_time))
+        t= time.time() - local_time
+        print(f'[{func.__name__}] spent {t:.2f}s\n')
         return res
 
     return wrapper

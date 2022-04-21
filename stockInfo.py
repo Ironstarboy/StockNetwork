@@ -15,3 +15,7 @@ def getNormalStock(mkt:tuple)->list:
     return stockCd,name
 
 
+
+
+
+
