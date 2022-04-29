@@ -1,11 +1,17 @@
 import pymysql
+from warnings import filterwarnings
+filterwarnings("error",category=pymysql.Warning) #指定过滤告警的类别为pymysql.Warning类
+
+# 写成类应该可以持久化链接
 
 def connect():
     db=pymysql.connect(host='localhost',
-                         port=3306,
-                         user='root',
-                         password='123123',
-                         database='stockdata')
+                       port=3306,
+                       user='root',
+                       password='123123',
+                       charset='utf8',
+                       # cursorclass= pymysql.cursors.DictCursor,  # 返回值会变成字典格式
+                       database='stockdata')
     return db
 
 
