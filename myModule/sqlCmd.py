@@ -1,4 +1,5 @@
 import pymysql
+import os
 from warnings import filterwarnings
 filterwarnings("error",category=pymysql.Warning) #指定过滤告警的类别为pymysql.Warning类
 
@@ -22,11 +23,11 @@ def select(sql):
     try:
         cursor.execute(sql)
         results = cursor.fetchall()
-    except Exception as e:
-        print(e)
-        print('select error')
-    db.close()
-    return results
+    except pymysql.Warning as e:
+        os.abort(50009, str({'error':e,'sql':sql}))
+    finally:
+        db.close()
+        return results
 
 
 def insert(sql):
@@ -35,11 +36,12 @@ def insert(sql):
     try:
        cursor.execute(sql)
        db.commit()
-    except:
+    except pymysql.Warning as e:
        # 如果发生错误则回滚
+       os.abort(50009, str({'error': e, 'sql': sql}))
        db.rollback()
-       print('insert error')
-    db.close()
+    finally:
+        db.close()
 
 
 def create(sql,tableName):
