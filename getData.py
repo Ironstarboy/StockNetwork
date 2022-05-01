@@ -22,11 +22,10 @@ def cd2sql(cd):
         start_date='2021-01-04', end_date='2022-01-30',
         frequency="5", adjustflag="3")
     assert rs.error_code=='0',rs.error_msg
-    
+
     data:pd.DataFrame=rs.get_data()
 
     # 建立连接，username替换为用户名，passwd替换为密码，test替换为数据库名
-    # TODO 数据库链接暂时出问题
     connect = create_engine("mysql+pymysql://root:123123@localhost:3306/stockdata")
     # https://www.jianshu.com/p/d34cfe23d5a4
     data.rename(columns={'date': 'trdate',

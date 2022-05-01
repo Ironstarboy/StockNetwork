@@ -94,10 +94,9 @@ def timer(func):
     # 函数计时器
     def wrapper(*args, **kw):
         local_time = time.time()
-        print(f'[{func.__name__}] is running',end=': ')
+        print(f'\033[37m[{func.__name__}] is running',end=': ')
         res=func(*args, **kw)
         t= time.time() - local_time
-        print(f'[{func.__name__}] spent {t:.2f}s\n')
+        print(f'[{func.__name__}] spent {t:.2f}s\033[0m')
         return res
-
     return wrapper

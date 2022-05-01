@@ -12,8 +12,18 @@ def getNormalStock(mkt:tuple)->list:
     '''
     res= sqlCmd.select(sql)
     stockCd=[i[0] for i in res]
+
+    stCodesIndex=[127,204,249,261,296,428,729] # 停牌一天
+    stCodes=[stockCd[i] for i in stCodesIndex]
+    for cdindex in stCodes:
+        stockCd.remove(cdindex)
+    # print(stCodes)
     name=[i[1] for i in res]
     return stockCd,name
+
+a=getNormalStock((1))
+
+
 
 
 
