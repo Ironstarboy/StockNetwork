@@ -3,13 +3,8 @@ from myModule import myIO
 import networkx as nx
 import matplotlib.pyplot as plt
 import stockInfo
-
-
-
 # 无向图网络
 # 从无向图聚类，发现一些关联股票社群。然后这有什么意义？ 概念股？
-
-import stockInfo
 class Net():
     def __init__(self,QMat,mkt):
         self.Q=QMat
@@ -24,6 +19,7 @@ class Net():
         for i in range(len(self.Q)):
             for j in range(len(self.Q)):
                 edge=(cd[i],cd[j],self.Q[i][j])
+                # 这边的edge也可以用股票代码或者股票名字替代
                 edges.append(edge)
         return edges
 
@@ -38,12 +34,5 @@ class Net():
         G.add_edges_from(edges)
         return G
 
-mkt=(1)
-start=0
-t=303
-tao=0
-T=t+tao
-end=T+start
-QMatPath=f'src/var/Qm{mkt}s{start}e{end}tao{tao}.pkl'
-Q=myIO.loadVar(QMatPath)
-n=Net(Q,mkt)
+    def plotG(self):
+        ...
