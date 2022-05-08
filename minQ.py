@@ -5,33 +5,45 @@ from tqdm import tqdm
 import os
 import stockInfo
 import numpy as np
-import threading
+# import threading
 import pandas as pd
-
+import config
 @myIO.timer
 def getReturnMat(mkt:tuple):
+    indname=config.get('indname')
+
     # 多个股票在某一天的T(48)个时间段的收益率 矩阵
-    outPath=f'src/var/minReturnMat{mkt}.pkl'
-    count=0
+    outPath=config.getReturnMatPath()
+    cdlist=[]
     if not os.path.exists(outPath):
-        stockcd = stockInfo.getNormalStock(mkt)[0]
+        stockcd = stockInfo.getNormalStock(mkt,indname)[0]
         # 各个股票1天48个时间段之间的对数收益率
-        returnMat = np.empty(shape=(48, len(stockcd))) # T*n
+        returnMat = np.zeros(shape=(48*2, len(stockcd))) # T*n
         index=0
         for cd in tqdm(stockcd):
             sql=f'''
-            select lnreturn from mindata
-            where cd='sh.{cd}' and trdate='2021-01-04'
+            select lnreturn from mindata2
+            where cd='sh.{cd}' and trdate in ('2021-03-01','2021-03-02')
             '''
             retlst=[i[0] for i in sqlCmd.select(sql)]
-            assert len(retlst)==48,f'{cd}没有交易数据'
-            col=np.array(retlst).reshape( (len(retlst),1) ) # 列向量
-            returnMat[:,[index]] =col
-            index+=1
+            if len(retlst)==48*2:
+                cdlist.append(cd)
+                col=np.array(retlst).reshape( (len(retlst),1) ) # 列向量
+                returnMat[:,[index]] =col
+                index+=1
+            else:
+                print(f'{cd}数据库中没有交易记录')
+        # 剔除全0列
+        idx = np.argwhere(np.all(returnMat[..., :] == 0, axis=0))
+        returnMat = np.delete(returnMat, idx, axis=1)
+
+        # 保存收益率矩阵变量
         myIO.dumpVar(returnMat, outPath)
+        # 保存有交易记录的股票代码list变量
+        cdlistPath = config.getCdlistPath()
+        myIO.dumpVar(cdlist, cdlistPath)
     else:
         print(f'{outPath}已存在,如需更新请删掉文件，重新运行代码')
-
 
 def myCov(A,D):
     # E[ (A-EA)(D-ED) ]
@@ -46,7 +58,7 @@ def myCov(A,D):
 def saveQMat(returnMat, filePath, start=0, end=48, tao=1):
     # returnMat T * N
     # 初始Q矩阵，不做绝对值对比
-    assert end<=48,'交易时间不能超过48个单位'
+    assert end<=48*2,f'交易时间不能超过{48*2}个单位'
     if not os.path.exists(filePath):
         returnMat=returnMat[start:end,:]
         T=end-start
@@ -71,11 +83,13 @@ def plotQ(Q,QMatPath):
 
     m=np.mean(Q)
     sigma=np.std(Q)
-
-    outPath=f'out/pic/'
-    plt.hist(Q.flatten(), bins=100, facecolor="blue", alpha=0.5)
+    print(f'q均值{m:.6f},σ={sigma:.6f}')
+    plt.figure(dpi=800)
+    outPath=f'out/pic/min/'
+    plt.hist(Q.flatten(), bins=500, facecolor="blue", alpha=0.5)
     plt.title(myIO.getFileName(QMatPath))
-
+    plt.ylabel('相关性系数')
+    plt.xlabel('个数')
     plt.savefig(f'{outPath}{myIO.getFileName(QMatPath).split(".")[0]}.png')
 
 
@@ -86,26 +100,27 @@ def plotQtao():
 
     plt.figure(dpi=800)
     # TODO 对于不同的tao 可以统计基础的统计变量，比如均值和方差，然后假设检验u1>u2
-    for tao in [0,1,2,3,5,6,10]:
+    for tau in [0,1,2,3,5,6,10]:
         start = 0
-        t = 36
-        T = t + tao
+        t = 38*2
+        T = t + tau
         end = T + start
         # 这边的Q要处理一下
-        QMatPath = f'src/var/Qm{mkt}s{start}t{t}tao{tao}.pkl'
-        saveQMat(returnMat, QMatPath, start, end, tao=tao)
+        QMatPath = config.getQMatPath(tau)
+        saveQMat(returnMat, QMatPath, start, end, tao=tau)
         Q :np.ndarray= myIO.loadVar(QMatPath)
         m=np.nanmean(Q)
         Q = pd.DataFrame(Q)
         Q.fillna(value=m,inplace=True,axis=1)
         Q=Q.values
-
+        plt.ylabel('相关性系数')
+        plt.xlabel('q的序号')
         plt.ylim(0, 1)
         x=sorted(sample(list(map(lambda x:abs(x),Q.flatten())),10000),reverse=1)
-        plt.plot(x,label=f'{tao}',linewidth=0.5)
+        plt.plot(x,label=f'{tau}',linewidth=0.5)
     plt.legend()
-    outPath = f'out/pic/'
-    plt.title('不同tao的相关性曲线')
+    outPath = f'out/pic/min/'
+    plt.title('不同τ的相关性曲线')
     plt.savefig(f'{outPath}不同τ的相关性曲线.png')
 
 
@@ -117,22 +132,25 @@ matplotlib.rcParams['font.sans-serif']=['SimHei']   # 用黑体显示中文
 matplotlib.rcParams['axes.unicode_minus']=False     # 正常显示负号
 
 
-mkt=(1)
-start=0
-t=47
-tao=1
-T=t+tao
+mkt=config.get('mkt')
+indname=config.get('indname')
+start=config.get('start')
+t=config.get('t')
+tau=config.get('tau')
+
+T= t + tau
 end=T+start
 
+# 保存了收益率矩阵 cd列表
 getReturnMat(mkt)
-returnMatPath=f'src/var/minReturnMat1.pkl'
+
+
+returnMatPath=config.getReturnMatPath()
 returnMat= myIO.loadVar(returnMatPath)
-# TODO returnMat里全0列剔除
-# ret=pd.DataFrame(returnMat)
-# ret.ix[~(abs(ret-0.0)<1e-6).all(axis=1),:]
-# returnMat=ret.values
-QMatPath=f'src/var/Qm{mkt}s{start}e{end}tao{tao}.pkl'
-saveQMat(returnMat, QMatPath, start,end,tao=tao)
+
+QMatPath=config.getQMatPath()
+saveQMat(returnMat, QMatPath, start, end, tao=tau)
+
 Q:np.ndarray=myIO.loadVar(QMatPath)
 m=np.nanmean(Q)
 Q=pd.DataFrame(Q)
@@ -141,7 +159,9 @@ Q.fillna(value=m,inplace=True,axis=1)
 # print(Q[Q.isnull().any()])
 # print(Q[Q.isnull().T.all()])
 
-Q=Q.values
+
+# 绘制Q的相关图
+Q=Q.values# df转为ndarray
 plotQ(Q,QMatPath)
 plotQtao()
 

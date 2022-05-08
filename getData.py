@@ -19,7 +19,7 @@ def cd2sql(cd):
     # 周月线指标：date,code,open,high,low,close,volume,amount,adjustflag,turn,pctChg
     rs = bs.query_history_k_data_plus(f"sh.{cd}",
         "date,time,code,open,close",
-        start_date='2021-01-04', end_date='2022-01-30',
+        start_date='2021-03-01', end_date='2021-03-30',
         frequency="5", adjustflag="3")
     assert rs.error_code=='0',rs.error_msg
 
@@ -33,8 +33,9 @@ def cd2sql(cd):
                          'code': 'cd',
                          'open':'openprice',
                          'close':'closeprice'}, inplace=True)
-    data.to_sql( "mindata", connect,if_exists='append',index=False)
-
+    data.to_sql( "mindata2", connect,if_exists='append',index=False)
+    # mindata 数据库是2021-01-04到2022-01-30的分钟级数据
+    # mindata2数据库是2021-03-01到2021-03-30的分钟级数据
 
 import stockInfo
 from tqdm import tqdm

@@ -76,6 +76,8 @@ def dumpVar(var,filePath):
     if not os.path.exists(filePath):
         with open(filePath,'wb') as f:
             pickle.dump(var, f)
+            print(f'已保存至{filePath}')
+
 
 
 def loadVar(filePath):

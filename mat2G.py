@@ -2,10 +2,11 @@ import stockInfo
 from  myModule import myIO
 import pandas as pd
 from tqdm import tqdm
+import config
 
-
+#
 @myIO.timer
-def filterQ(Q,delta=0.5):
+def filterQ(Q):
     n=len(Q)
     for i in tqdm(range(n)):
         for j in range(n):
@@ -19,8 +20,10 @@ def filterQ(Q,delta=0.5):
                 Q[i][j]=Q[j][i]=0
     return Q
 
-qpath='src/var/Qm1s0e48tao1.pkl'
-Q=myIO.loadVar(qpath)
+QMatPath=config.getQMatPath()
+# qpath='src/var/Qm1s0e48tao1.pkl'
+Q=myIO.loadVar(QMatPath)
+
 
 @myIO.timer
 def mat2edge(Q):
@@ -28,8 +31,10 @@ def mat2edge(Q):
     # 由于有涨停股票，所以该类股票收益率后期一直是0，和其他股票收益率相关性很大
     n = len(Q)
     col=['source','target','id','label','weight']
-    cds=stockInfo.getNormalStock((1))[0]
-    names=stockInfo.getNormalStock((1))[1]
+
+    cdlistPath=config.getCdlistPath()
+    cds=myIO.loadVar(cdlistPath)
+    names=stockInfo.getNamesBycds(cds)
     s=[]
     t=[]
     w=[]
@@ -47,11 +52,8 @@ def mat2edge(Q):
                 s.append(cds[i])
                 t.append(cds[j])
                 w.append(abs(Q[i][j]))
-
-            id.append(cds[i])
-            id.append(cds[j])
-            label.append(names[i])
-            label.append(names[j])
+        id.append(cds[i])
+        label.append(names[i])
     edges={
         'source':s,
         'target':t,
@@ -62,8 +64,11 @@ def mat2edge(Q):
         'label': label
     }
 
-    # pd.DataFrame(nodes).to_excel('src/min-Q-nodes.xlsx')
-    pd.DataFrame(edges).to_excel('src/min-Q-edges.xlsx')
+    indname=config.get('indname')
+
+    print('saving xlsx...')
+    pd.DataFrame(nodes).to_excel(f'src/min-Q-nodes{indname}.xlsx')
+    pd.DataFrame(edges).to_excel(f'src/min-Q-edges{indname}.xlsx')
 
 mat2edge(Q)
 
