@@ -23,11 +23,13 @@ def readFile(filename):
     return content
 
 def mkDir(dirPath):
-    if not os.path.exists(dirPath):
-        os.makedirs(dirPath) # 可以递归创建 ，即可以创建多层目录结构
-        print('{}创建成功'.format(dirPath))
+    # pic/1.png 1.png会被创建成文件夹
+    dirname=os.path.dirname(dirPath)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname) # 可以递归创建 ，即可以创建多层目录结构
+        print('dir {}创建成功'.format(dirname))
     else:
-        print('{}已存在'.format(dirPath))
+        print('dir {}已存在'.format(dirname))
     return dirPath
 
 # 获取文件列表，该目录下放着一同个类别的文档,数量为几百份。不进行递归获取
@@ -48,7 +50,7 @@ def delFileByDir(dir):
         print('{} is deleted'.format(fileNameExt))
 
 
-def getFileName(filePath):
+def getFileNameExt(filePath):
     """ 输入文件路径，输出文件名以及后缀 """
     return os.path.basename(filePath)
 
@@ -64,16 +66,16 @@ def recusiveGetFilePathList(dir):
     return res,fileNames
 
 
-
 def saveText(filePath, content:str, mode='w'):
     with open(filePath, mode,encoding='utf-8') as f:
         f.write(content)
 
 
-
 import pickle
 def dumpVar(var,filePath):
     if not os.path.exists(filePath):
+        dirname=os.path.dirname(filePath)
+        mkDir(dirname)
         with open(filePath,'wb') as f:
             pickle.dump(var, f)
             print(f'已保存至{filePath}')

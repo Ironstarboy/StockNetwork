@@ -87,10 +87,10 @@ def plotQ(Q,QMatPath):
     plt.figure(dpi=800)
     outPath=f'out/pic/min/'
     plt.hist(Q.flatten(), bins=500, facecolor="blue", alpha=0.5)
-    plt.title(myIO.getFileName(QMatPath))
+    plt.title(myIO.getFileNameExt(QMatPath))
     plt.ylabel('相关性系数')
     plt.xlabel('个数')
-    plt.savefig(f'{outPath}{myIO.getFileName(QMatPath).split(".")[0]}.png')
+    plt.savefig(f'{outPath}{myIO.getFileNameExt(QMatPath).split(".")[0]}.png')
 
 
 # 对于不同的τ，Q矩阵的q值降序排序

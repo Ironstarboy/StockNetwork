@@ -11,7 +11,7 @@ import config
 @myIO.timer
 def getReturnMat(mkt:tuple):
     indname=config.get('indname')
-
+    type=config.get('type')
     # 多个股票在某一天的T(48)个时间段的收益率 矩阵
     outPath=config.getReturnMatPath()
     cdlist=[]
@@ -61,7 +61,8 @@ def myCov(A,D):
 def saveQMat(returnMat, filePath, start=0, end=48, tao=1):
     # returnMat T * N
     # 初始Q矩阵，不做绝对值对比
-    assert end<=48*2,f'交易时间不能超过{48*2}个单位'
+    T=config.get('T')
+    assert end<=T,f'交易时间不能超过{T}个单位'
     if not os.path.exists(filePath):
         returnMat=returnMat[start:end,:]
         T=end-start
@@ -83,29 +84,32 @@ def saveQMat(returnMat, filePath, start=0, end=48, tao=1):
 # Q的直方图
 @myIO.timer
 def plotQ(Q,QMatPath):
-
+    Delta_t=config.get('Delta_t')
     m=np.mean(Q)
     sigma=np.std(Q)
     print(f'q均值{m:.6f},σ={sigma:.6f}')
     plt.figure(dpi=800)
-    outPath=f'out/pic/min/'
     plt.hist(Q.flatten(), bins=500, facecolor="blue", alpha=0.5)
-    plt.title(myIO.getFileName(QMatPath))
+    plt.title(myIO.getFileNameExt(QMatPath))
     plt.ylabel('相关性系数')
     plt.xlabel('个数')
-    plt.savefig(f'{outPath}{myIO.getFileName(QMatPath).split(".")[0]}.png')
+
+    outPath = f'out/pic/{Delta_t}/'
+    myIO.mkDir(outPath)
+    plt.savefig(f'{outPath}{myIO.getFileNameExt(QMatPath).split(".")[0]}.png')
 
 
 # 对于不同的τ，Q矩阵的q值降序排序
 from random import sample
 @myIO.timer
 def plotQtao():
+    Delta_t = config.get('Delta_t')
 
     plt.figure(dpi=800)
     # TODO 对于不同的tao 可以统计基础的统计变量，比如均值和方差，然后假设检验u1>u2
     for tau in [0,1,2,3,5,6,10]:
         start = 0
-        t = 38*2
+        t = 48*3-10
         T = t + tau
         end = T + start
         # 这边的Q要处理一下
@@ -122,8 +126,10 @@ def plotQtao():
         x=sorted(sample(list(map(lambda x:abs(x),Q.flatten())),10000),reverse=1)
         plt.plot(x,label=f'{tau}',linewidth=0.5)
     plt.legend()
-    outPath = f'out/pic/min/'
     plt.title('不同τ的相关性曲线')
+
+    outPath = f'out/pic/{Delta_t}/'
+    myIO.mkDir(outPath)
     plt.savefig(f'{outPath}不同τ的相关性曲线.png')
 
 
@@ -165,9 +171,8 @@ Q.fillna(value=m,inplace=True,axis=1)
 
 # 绘制Q的相关图
 Q=Q.values# df转为ndarray
-# plotQ(Q,QMatPath)
-# plotQtao()
-
+plotQ(Q,QMatPath)
+plotQtao()
 
 
 
