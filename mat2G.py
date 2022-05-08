@@ -35,9 +35,9 @@ def mat2edge(Q):
     cdlistPath=config.getCdlistPath()
     cds=myIO.loadVar(cdlistPath)
     names=stockInfo.getNamesBycds(cds)
-    s=[]
-    t=[]
-    w=[]
+    source=[]
+    target=[]
+    weight=[]
 
     id=[]
     label=[]
@@ -45,19 +45,19 @@ def mat2edge(Q):
     for i in tqdm(range(n)):
         for j in range(n):
             if abs(Q[i][j])<abs(Q[j][i]):
-                s.append(cds[j])
-                t.append(cds[i])
-                w.append(abs(Q[j][j]))
+                source.append(cds[j])
+                target.append(cds[i])
+                weight.append(abs(Q[j][j]))
             elif abs(Q[i][j])>abs(Q[j][i]):
-                s.append(cds[i])
-                t.append(cds[j])
-                w.append(abs(Q[i][j]))
+                source.append(cds[i])
+                target.append(cds[j])
+                weight.append(abs(Q[i][j]))
         id.append(cds[i])
         label.append(names[i])
     edges={
-        'source':s,
-        'target':t,
-        'weight':w
+        'source':source,
+        'target':target,
+        'weight':weight
     }
     nodes={
         'id': id,
@@ -65,10 +65,10 @@ def mat2edge(Q):
     }
 
     indname=config.get('indname')
-
+    t=config.get('t')
     print('saving xlsx...')
-    pd.DataFrame(nodes).to_excel(f'src/min-Q-nodes{indname}.xlsx')
-    pd.DataFrame(edges).to_excel(f'src/min-Q-edges{indname}.xlsx')
+    pd.DataFrame(nodes).to_excel(f'src/min-Q-nodes-t{t}{indname}.xlsx')
+    pd.DataFrame(edges).to_excel(f'src/min-Q-edges-t{t}{indname}.xlsx')
 
 mat2edge(Q)
 

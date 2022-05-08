@@ -5,7 +5,7 @@ json配置文件暂时不熟，用dict偷懒替代一下
 global _config
 _config = {'mkt':(1),
            'start':0,
-           't':47,
+           't':95,
            'tau':1,
            'type':'min',
            'indname':'工业',
@@ -34,7 +34,7 @@ def get_items():
     return _config.items()
 
 def getCdlistPath():
-    cdlistPath=f'src/var/cd-m{mkt}s{start}t{t}tao{tau}{indname}.pkl'
+    cdlistPath=f'src/var/cd-m{mkt}s{start}t{t}tau{tau}{indname}.pkl'
     return cdlistPath
 
 def getReturnMatPath(type=get('type')):

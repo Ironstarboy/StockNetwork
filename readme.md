@@ -76,7 +76,7 @@ https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%A8-networkx/
 
 # 参考教程
 
-networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%A8-networkx/#nx-draw-networkx-labels-%E7%94%BB%E7%82%B9%E7%9A%84labels
+networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%A8-networkx/#nx-draw-networkx-labels-%E7%94%BB%E7%82%B9%E7%9A%84labels	
 
 # 处理步骤
 
@@ -88,3 +88,15 @@ networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%
 6. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
 7. 导出节点和边的属性表格
 8. 根据modularity给节点划分社团。
+
+
+
+存在一种现象：
+
+少数股票涨停，导致收益率序列后面全是0.少数股票交易不活跃，导致5分钟内价格没有波动，收益率序列也有很多0.他们的收益率相关性非常高。
+
+涨停股票和涨停股票之间的相关性比较高。
+
+
+
+解决方案是收益率计算精度边长。还有就是总的时间边长。

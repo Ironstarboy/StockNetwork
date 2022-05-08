@@ -16,40 +16,40 @@ def connect():
     return db
 
 
-def select(sql):
+def select(query):
     db = connect()
     cursor = db.cursor()  # 使用cursor()方法获取操作游标
     results=None
     try:
-        cursor.execute(sql)
+        cursor.execute(query)
         results = cursor.fetchall()
     except pymysql.Warning as e:
-        os.abort(50009, str({'error':e,'sql':sql}))
+        os.abort(50009, str({'error':e,'sql':query}))
     finally:
         db.close()
         return results
 
 
-def insert(sql):
+def insert(query):
     db = connect()
     cursor = db.cursor()
     try:
-       cursor.execute(sql)
+       cursor.execute(query)
        db.commit()
     except pymysql.Warning as e:
        # 如果发生错误则回滚
-       os.abort(50009, str({'error': e, 'sql': sql}))
+       os.abort(50009, str({'error': e, 'sql': query}))
        db.rollback()
     finally:
         db.close()
 
 
-def create(sql,tableName):
+def create(query, tableName):
     db=connect()
     cursor = db.cursor()
     try:
         cursor.execute("DROP TABLE IF EXISTS {}".format(tableName))
-        cursor.execute(sql)
+        cursor.execute(query)
     except:
         print('create error')
     db.close()

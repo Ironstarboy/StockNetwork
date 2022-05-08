@@ -41,7 +41,7 @@ def getNormalStock(mkt:tuple,indname:str='')->list:
         name = [i[1] for i in res]
         return stockCd, name
 
-@myIO.timer
+
 def getNamesBycds(cdlist:list):
 
     cdlist=tuple(cdlist)
