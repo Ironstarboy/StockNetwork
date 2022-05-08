@@ -18,15 +18,18 @@ def getReturnMat(mkt:tuple):
     if not os.path.exists(outPath):
         stockcd = stockInfo.getNormalStock(mkt,indname)[0]
         # 各个股票1天48个时间段之间的对数收益率
-        returnMat = np.zeros(shape=(48*2, len(stockcd))) # T*n
+        days = ('2021-03-01', '2021-03-02', '2021-03-03')
+        returnMat = np.zeros(shape=(48*len(days), len(stockcd))) # T*n
         index=0
+        query=f'''
+        select cd,lnreturn from mindata2
+            where trdate in {days}
+        '''
+        res=sqlCmd.select(query)
+        df=pd.DataFrame(list(res),columns=['stkcd','lnreturn'])
         for cd in tqdm(stockcd):
-            sql=f'''
-            select lnreturn from mindata2
-            where cd='sh.{cd}' and trdate in ('2021-03-01','2021-03-02')
-            '''
-            retlst=[i[0] for i in sqlCmd.select(sql)]
-            if len(retlst)==48*2:
+            retlst:np.ndarray=df[df.stkcd==f'sh.{cd}'].lnreturn.values
+            if len(retlst)==48*len(days):
                 cdlist.append(cd)
                 col=np.array(retlst).reshape( (len(retlst),1) ) # 列向量
                 returnMat[:,[index]] =col
@@ -141,7 +144,7 @@ tau=config.get('tau')
 T= t + tau
 end=T+start
 
-# 保存了收益率矩阵 cd列表
+# 保存了收益率矩阵returnMat cdlist
 getReturnMat(mkt)
 
 
@@ -162,8 +165,8 @@ Q.fillna(value=m,inplace=True,axis=1)
 
 # 绘制Q的相关图
 Q=Q.values# df转为ndarray
-plotQ(Q,QMatPath)
-plotQtao()
+# plotQ(Q,QMatPath)
+# plotQtao()
 
 
 
