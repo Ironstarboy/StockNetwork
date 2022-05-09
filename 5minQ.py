@@ -1,5 +1,4 @@
 # 分钟级别的Q处理
-
 from myModule import myIO, sqlCmd
 from tqdm import tqdm
 import os
@@ -11,7 +10,6 @@ import config
 @myIO.timer
 def getReturnMat(mkt:tuple):
     indname=config.get('indname')
-    type=config.get('type')
     # 多个股票在某一天的T(48)个时间段的收益率 矩阵
     outPath=config.getReturnMatPath()
     cdlist=[]
@@ -19,17 +17,18 @@ def getReturnMat(mkt:tuple):
         stockcd = stockInfo.getNormalStock(mkt,indname)[0]
         # 各个股票1天48个时间段之间的对数收益率
         days = ('2021-03-01', '2021-03-02', '2021-03-03')
-        returnMat = np.zeros(shape=(48*len(days), len(stockcd))) # T*n
+        dayLen=48 # 不同min需要修改 5min 48,15min 16 day 304
+        returnMat = np.zeros(shape=(dayLen*len(days), len(stockcd))) # T*n
         index=0
         query=f'''
-        select cd,lnreturn from mindata2
+        select cd,lnreturn from {config.Delta_t}data
             where trdate in {days}
         '''
         res=sqlCmd.select(query)
         df=pd.DataFrame(list(res),columns=['stkcd','lnreturn'])
         for cd in tqdm(stockcd):
             retlst:np.ndarray=df[df.stkcd==f'sh.{cd}'].lnreturn.values
-            if len(retlst)==48*len(days):
+            if len(retlst)==dayLen*len(days):
                 cdlist.append(cd)
                 col=np.array(retlst).reshape( (len(retlst),1) ) # 列向量
                 returnMat[:,[index]] =col
@@ -109,7 +108,7 @@ def plotQtao():
     # TODO 对于不同的tao 可以统计基础的统计变量，比如均值和方差，然后假设检验u1>u2
     for tau in [0,1,2,3,5,6,10]:
         start = 0
-        t = 48*3-10
+        t = 38 # 不同Delta_t需要修改
         T = t + tau
         end = T + start
         # 这边的Q要处理一下
@@ -126,11 +125,11 @@ def plotQtao():
         x=sorted(sample(list(map(lambda x:abs(x),Q.flatten())),10000),reverse=1)
         plt.plot(x,label=f'{tau}',linewidth=0.5)
     plt.legend()
-    plt.title('不同τ的相关性曲线')
+    plt.title(f'Delta_t={Delta_t}时不同τ的相关性曲线')
 
-    outPath = f'out/pic/{Delta_t}/'
+    outPath = f'out/pic/{Delta_t}'
     myIO.mkDir(outPath)
-    plt.savefig(f'{outPath}不同τ的相关性曲线.png')
+    plt.savefig(f'{outPath}/Delta_t={Delta_t}时不同τ的相关性曲线.png')
 
 
 import matplotlib.pyplot as plt
