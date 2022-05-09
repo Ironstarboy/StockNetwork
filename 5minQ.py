@@ -7,45 +7,6 @@ import numpy as np
 # import threading
 import pandas as pd
 import config
-@myIO.timer
-def getReturnMat(mkt:tuple):
-    indname=config.get('indname')
-    # 多个股票在某一天的T(48)个时间段的收益率 矩阵
-    outPath=config.getReturnMatPath()
-    cdlist=[]
-    if not os.path.exists(outPath):
-        stockcd = stockInfo.getNormalStock(mkt,indname)[0]
-        # 各个股票1天48个时间段之间的对数收益率
-        days = ('2021-03-01', '2021-03-02', '2021-03-03')
-        dayLen=48 # 不同min需要修改 5min 48,15min 16 day 304
-        returnMat = np.zeros(shape=(dayLen*len(days), len(stockcd))) # T*n
-        index=0
-        query=f'''
-        select cd,lnreturn from {config.Delta_t}data
-            where trdate in {days}
-        '''
-        res=sqlCmd.select(query)
-        df=pd.DataFrame(list(res),columns=['stkcd','lnreturn'])
-        for cd in tqdm(stockcd):
-            retlst:np.ndarray=df[df.stkcd==f'sh.{cd}'].lnreturn.values
-            if len(retlst)==dayLen*len(days):
-                cdlist.append(cd)
-                col=np.array(retlst).reshape( (len(retlst),1) ) # 列向量
-                returnMat[:,[index]] =col
-                index+=1
-            else:
-                print(f'{cd}数据库中没有交易记录')
-        # 剔除全0列
-        idx = np.argwhere(np.all(returnMat[..., :] == 0, axis=0))
-        returnMat = np.delete(returnMat, idx, axis=1)
-
-        # 保存收益率矩阵变量
-        myIO.dumpVar(returnMat, outPath)
-        # 保存有交易记录的股票代码list变量
-        cdlistPath = config.getCdlistPath()
-        myIO.dumpVar(cdlist, cdlistPath)
-    else:
-        print(f'{outPath}已存在,如需更新请删掉文件，重新运行代码')
 
 def myCov(A,D):
     # E[ (A-EA)(D-ED) ]
@@ -93,9 +54,9 @@ def plotQ(Q,QMatPath):
     plt.ylabel('相关性系数')
     plt.xlabel('个数')
 
-    outPath = f'out/pic/{Delta_t}/'
+    outPath = f'out/pic/{Delta_t}'
     myIO.mkDir(outPath)
-    plt.savefig(f'{outPath}{myIO.getFileNameExt(QMatPath).split(".")[0]}.png')
+    plt.savefig(f'{outPath}/{myIO.getFileNameExt(QMatPath).split(".")[0]}.png')
 
 
 # 对于不同的τ，Q矩阵的q值降序排序
@@ -103,12 +64,13 @@ from random import sample
 @myIO.timer
 def plotQtao():
     Delta_t = config.get('Delta_t')
-
+    indname=config.get('indname')
     plt.figure(dpi=800)
+    days=config.get('days')
     # TODO 对于不同的tao 可以统计基础的统计变量，比如均值和方差，然后假设检验u1>u2
     for tau in [0,1,2,3,5,6,10]:
         start = 0
-        t = 38 # 不同Delta_t需要修改
+        t = 48*len(days)-10 # 不同Delta_t需要修改
         T = t + tau
         end = T + start
         # 这边的Q要处理一下
@@ -129,7 +91,7 @@ def plotQtao():
 
     outPath = f'out/pic/{Delta_t}'
     myIO.mkDir(outPath)
-    plt.savefig(f'{outPath}/Delta_t={Delta_t}时不同τ的相关性曲线.png')
+    plt.savefig(f'{outPath}/Delta_t={Delta_t}时不同τ的相关性曲线-{indname}.png')
 
 
 import matplotlib.pyplot as plt
@@ -148,9 +110,6 @@ tau=config.get('tau')
 
 T= t + tau
 end=T+start
-
-# 保存了收益率矩阵returnMat cdlist
-getReturnMat(mkt)
 
 
 returnMatPath=config.getReturnMatPath()

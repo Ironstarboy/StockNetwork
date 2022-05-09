@@ -1,32 +1,34 @@
 # 天级别的Q处理
-# TODO 天级别的代码还没适配好 先不做天级 把分钟级别的 全体和分板块做好
 from myModule import myIO, sqlCmd
 from tqdm import tqdm
 import os
 import stockInfo
 import numpy as np
-import threading
+# import threading
 import pandas as pd
 import config
 @myIO.timer
 def getReturnMat(mkt:tuple):
     indname=config.get('indname')
-
     # 多个股票在某一天的T(48)个时间段的收益率 矩阵
-    outPath=config.getReturnMatPath('day')
+    outPath=config.getReturnMatPath()
     cdlist=[]
     if not os.path.exists(outPath):
         stockcd = stockInfo.getNormalStock(mkt,indname)[0]
         # 各个股票1天48个时间段之间的对数收益率
-        returnMat = np.zeros(shape=(304, len(stockcd))) # T*n
+        days = ('2021-03-01', '2021-03-02', '2021-03-03')
+        dayLen=48 # 不同min需要修改
+        returnMat = np.zeros(shape=(dayLen*len(days), len(stockcd))) # T*n
         index=0
+        query=f'''
+        select cd,lnreturn from stockprice
+            where trdate in {days}
+        '''
+        res=sqlCmd.select(query)
+        df=pd.DataFrame(list(res),columns=['stkcd','lnreturn'])
         for cd in tqdm(stockcd):
-            sql=f'''
-            select lnreturn from stockprice
-            where stkcd={cd}
-            '''
-            retlst=[i[0] for i in sqlCmd.select(sql)]
-            if len(retlst)==304:
+            retlst:np.ndarray=df[df.stkcd==cd].lnreturn.values
+            if len(retlst)==dayLen*len(days):
                 cdlist.append(cd)
                 col=np.array(retlst).reshape( (len(retlst),1) ) # 列向量
                 returnMat[:,[index]] =col
@@ -58,7 +60,8 @@ def myCov(A,D):
 def saveQMat(returnMat, filePath, start=0, end=48, tao=1):
     # returnMat T * N
     # 初始Q矩阵，不做绝对值对比
-    assert end<=48*2,f'交易时间不能超过{48*2}个单位'
+    T=config.get('T')
+    assert end<=T,f'交易时间不能超过{T}个单位'
     if not os.path.exists(filePath):
         returnMat=returnMat[start:end,:]
         T=end-start
@@ -80,16 +83,18 @@ def saveQMat(returnMat, filePath, start=0, end=48, tao=1):
 # Q的直方图
 @myIO.timer
 def plotQ(Q,QMatPath):
-
+    Delta_t=config.get('Delta_t')
     m=np.mean(Q)
     sigma=np.std(Q)
     print(f'q均值{m:.6f},σ={sigma:.6f}')
     plt.figure(dpi=800)
-    outPath=f'out/pic/min/'
     plt.hist(Q.flatten(), bins=500, facecolor="blue", alpha=0.5)
     plt.title(myIO.getFileNameExt(QMatPath))
     plt.ylabel('相关性系数')
     plt.xlabel('个数')
+
+    outPath = f'out/pic/{Delta_t}/'
+    myIO.mkDir(outPath)
     plt.savefig(f'{outPath}{myIO.getFileNameExt(QMatPath).split(".")[0]}.png')
 
 
@@ -97,12 +102,13 @@ def plotQ(Q,QMatPath):
 from random import sample
 @myIO.timer
 def plotQtao():
+    Delta_t = config.get('Delta_t')
 
     plt.figure(dpi=800)
     # TODO 对于不同的tao 可以统计基础的统计变量，比如均值和方差，然后假设检验u1>u2
     for tau in [0,1,2,3,5,6,10]:
         start = 0
-        t = 38*2
+        t = 38 # 不同Delta_t需要修改
         T = t + tau
         end = T + start
         # 这边的Q要处理一下
@@ -119,8 +125,10 @@ def plotQtao():
         x=sorted(sample(list(map(lambda x:abs(x),Q.flatten())),10000),reverse=1)
         plt.plot(x,label=f'{tau}',linewidth=0.5)
     plt.legend()
-    outPath = f'out/pic/min/'
     plt.title('不同τ的相关性曲线')
+
+    outPath = f'out/pic/{Delta_t}/'
+    myIO.mkDir(outPath)
     plt.savefig(f'{outPath}不同τ的相关性曲线.png')
 
 
@@ -141,7 +149,7 @@ tau=config.get('tau')
 T= t + tau
 end=T+start
 
-# 保存了收益率矩阵 cd列表
+# 保存了收益率矩阵returnMat cdlist
 getReturnMat(mkt)
 
 
@@ -159,10 +167,11 @@ Q.fillna(value=m,inplace=True,axis=1)
 # print(Q[Q.isnull().any()])
 # print(Q[Q.isnull().T.all()])
 
-Q=Q.values
+
+# 绘制Q的相关图
+Q=Q.values# df转为ndarray
 plotQ(Q,QMatPath)
 plotQtao()
-
 
 
 

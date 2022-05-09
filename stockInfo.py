@@ -3,9 +3,9 @@ from myModule import myIO
 import config
 
 # 交易日天数
-def getNormalStock(mkt:tuple,indname:str='')->list:
+def getNormalStock(mkt:tuple,indname:str='全行业')->list:
     # TODO
-    if indname=='':
+    if indname=='全行业':
         sql=f'''
         select distinct s.stkcd,c.stkname from stockprice s,coinfo c
                 where s.markettype in ({mkt})

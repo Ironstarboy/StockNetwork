@@ -80,14 +80,18 @@ networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%
 
 # 处理步骤
 
-1. 从csmar下载日级数据，保存交易数据到数据库stockprice coinfo;从baostock下载5分钟级交易数据，保存数据到mindata2
+1. 从csmar下载日级数据，保存交易数据到数据库stockprice coinfo;
+   从baostock下载k分钟级交易数据，保存数据到kmindata
+   1. baostock用的sqlalchemy把df写入数据库，默认格式都是下载格式的text，需要alter改字段类型
 2. 数据库使用update指令，根据收盘价开盘价格计算对数收益率序列
-3. 运行minQ.py文件，得到指定开始时间、截止时间、市场类型、行业类型的收益率矩阵returnMat，正常交易的股票代码和name。根据returnmat,计算出Q值
-4. 运营mat2G.py文件，将关联矩阵，转化成对应的股票节点表格和边表格
-5. gephi里根据边的权重进行筛选，剔除弱关联的边
-6. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
-7. 导出节点和边的属性表格
-8. 根据modularity给节点划分社团。
+3. 运营retunrnMat.py文件得到收益率序列，记录有交易记录的股票代码list变量；得到指定开始时间、截止时间、市场类型、行业类型的收益率矩阵returnMat。
+4. 运行timeSetires.py文件。去除非平稳序列,得到平稳股票的cdlist。更新retunrnMat
+5. 运行minQ.py文件，根据returnmat,计算出Q值。要注意t的值和returnmat的维度
+6. 运营mat2G.py文件，将关联矩阵，转化成对应的股票节点表格和边表格
+7. gephi里根据边的权重进行筛选，剔除弱关联的边
+8. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
+9. 导出节点和边的属性表格
+10. 根据modularity给节点划分社团。
 
 
 

@@ -24,12 +24,11 @@ def readFile(filename):
 
 def mkDir(dirPath):
     # pic/1.png 1.png会被创建成文件夹
-    dirname=os.path.dirname(dirPath)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname) # 可以递归创建 ，即可以创建多层目录结构
-        print('dir {}创建成功'.format(dirname))
+    if not os.path.exists(dirPath):
+        os.makedirs(dirPath) # 可以递归创建 ，即可以创建多层目录结构
+        print('dir {}创建成功'.format(dirPath))
     else:
-        print('dir {}已存在'.format(dirname))
+        print('dir {}已存在'.format(dirPath))
     return dirPath
 
 # 获取文件列表，该目录下放着一同个类别的文档,数量为几百份。不进行递归获取
