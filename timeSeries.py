@@ -66,26 +66,40 @@ def getNotStionarycd():
     return notStaionaryCd
 
 
+# 单个股票的基本信息输出
+def singleCdInfo(stkcd):
+    global cdlist
+    cdIndex=cdlist.index(stkcd)
+    ret=getRet(cdIndex)
+    plotAcf(ret,stkcd)
+    plotPacf(ret,stkcd)
+    plotTs(ret,stkcd)
 
-#对于非平稳时间序列要先进行d阶差分运算，化为平稳时间序列
+
+
+
+
 
 if __name__=="__main__":
 
     cdlist =myIO.loadVar(config.getCdlistPath())
-    notStaionaryCd=getNotStionarycd()
-    # 去除非平稳序列
+    # notStaionaryCd=getNotStionarycd()
+    # #returnMat去除非平稳的股票
+    # returnMat=myIO.loadVar(config.getReturnMatPath())
+    # notStaionaryCdIndex=[]
+    # for cd in notStaionaryCd:
+    #     cdIndex=cdlist.index(cd)
+    #     notStaionaryCdIndex.append(cdIndex)
+    # returnMat=np.delete(returnMat, notStaionaryCdIndex, axis=1)
+    # myIO.loadVar(config.getReturnMatPath())
+    #
+    # for cd in notStaionaryCd:
+    #     cdlist.remove(cd)
+    # myIO.dumpVar(cdlist,config.getCdlistPath())
 
+    ret1=getRet(0)
+    ret2=getRet(1)
+    granger(ret1,ret2)
 
-    #returnMat去除非平稳的股票
-    returnMat=myIO.loadVar(config.getReturnMatPath())
-    notStaionaryCdIndex=[]
-    for cd in notStaionaryCd:
-        cdIndex=cdlist.index(cd)
-        notStaionaryCdIndex.append(cdIndex)
-    returnMat=np.delete(returnMat, notStaionaryCdIndex, axis=1)
-    myIO.loadVar(config.getReturnMatPath())
-
-    for cd in notStaionaryCd:
-        cdlist.remove(cd)
-    myIO.dumpVar(cdlist,config.getCdlistPath())
+    # singleCdInfo(600533)
 

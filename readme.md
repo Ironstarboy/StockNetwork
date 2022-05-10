@@ -85,13 +85,14 @@ networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%
    1. baostock用的sqlalchemy把df写入数据库，默认格式都是下载格式的text，需要alter改字段类型
 2. 数据库使用update指令，根据收盘价开盘价格计算对数收益率序列
 3. 运营retunrnMat.py文件得到收益率序列，记录有交易记录的股票代码list变量；得到指定开始时间、截止时间、市场类型、行业类型的收益率矩阵returnMat。
-4. 运行timeSetires.py文件。去除非平稳序列,得到平稳股票的cdlist。更新retunrnMat
+4. 运行timeSetires.py文件，进行adf检验。去除非平稳序列,得到平稳股票的cdlist。更新retunrnMat
 5. 运行minQ.py文件，根据returnmat,计算出Q值。要注意t的值和returnmat的维度
-6. 运营mat2G.py文件，将关联矩阵，转化成对应的股票节点表格和边表格
-7. gephi里根据边的权重进行筛选，剔除弱关联的边
-8. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
-9. 导出节点和边的属性表格
-10. 根据modularity给节点划分社团。
+6. 运营mat2G.py文件，对q进行granger筛选、大小筛选。将关联矩阵，转化成对应的股票节点表格和边表格
+7. 进行granger检验，边表格进行更新。
+8. gephi里根据边的权重进行筛选，剔除弱关联的边
+9. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
+10. 导出节点和边的属性表格
+11. 根据modularity给节点划分社团。
 
 
 
@@ -106,3 +107,9 @@ networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%
 
 
 解决方案是收益率计算精度边长。还有就是总的时间边长。
+
+# 时间序列处理的基本过程
+
+[参考文章](https://blog.51cto.com/u_14293657/4220519)
+
+戈兰泽https://www.biaodianfu.com/granger-causality-test.html

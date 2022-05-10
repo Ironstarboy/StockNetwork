@@ -3,12 +3,15 @@ from  myModule import myIO
 import pandas as pd
 from tqdm import tqdm
 import config
-
+import granger
 
 @myIO.timer
 def mat2edge(Q):
     # Q 矩阵转成边和节点
     # 由于有涨停股票，所以该类股票收益率后期一直是0，和其他股票收益率相关性很大
+    cdlist=myIO.loadVar(config.getCdlistPath())
+    returnMat=myIO.loadVar(config.getReturnMatPath())
+
     n = len(Q)
     cdlistPath=config.getCdlistPath()
     cds=myIO.loadVar(cdlistPath)
@@ -23,11 +26,13 @@ def mat2edge(Q):
 
     for i in tqdm(range(n)):
         for j in range(i,n):
-            if abs(Q[i][j])<abs(Q[j][i]):
+            ret1=returnMat[:,i]
+            ret2=returnMat[:,j]
+            if abs(Q[i][j])<abs(Q[j][i]) and granger.granger(ret2,ret1):
                 source.append(cds[j])
                 target.append(cds[i])
                 weight.append(abs(Q[j][j]))
-            elif abs(Q[i][j])>abs(Q[j][i]):
+            elif abs(Q[i][j])>abs(Q[j][i]) and granger.granger(ret1,ret2):
                 source.append(cds[i])
                 target.append(cds[j])
                 weight.append(abs(Q[i][j]))
@@ -46,14 +51,12 @@ def mat2edge(Q):
     indname=config.get('indname')
     t=config.get('t')
     print('saving xlsx...')
-    pd.DataFrame(nodes).to_excel(f'src/{config.Delta_t}-Q-nodes-t{t}{indname}.xlsx')
-    pd.DataFrame(edges).to_excel(f'src/{config.Delta_t}-Q-edges-t{t}{indname}.xlsx')
+    pd.DataFrame(nodes).to_excel(f'src/{config.Delta_t}-Q-nodes-t{t}{indname}1.xlsx')
+    pd.DataFrame(edges).to_excel(f'src/{config.Delta_t}-Q-edges-t{t}{indname}1.xlsx')
 
-
-QMatPath=config.getQMatPath()
-Q=myIO.loadVar(QMatPath)
-
-
-mat2edge(Q)
+if __name__=='__main__':
+    QMatPath=config.getQMatPath()
+    Q=myIO.loadVar(QMatPath)
+    mat2edge(Q)
 
 
