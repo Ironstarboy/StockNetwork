@@ -2,9 +2,10 @@
 from myModule import myIO
 import pandas as pd
 from statsmodels.tsa.stattools import grangercausalitytests
-
+import config
 def granger(ret1,ret2):
     # ret2是延后的
+    tau=config.get('tau')
     a=ret1.tolist()
     b=ret2.tolist()
     d={

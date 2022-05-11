@@ -48,11 +48,9 @@ def mat2edge(Q):
         'label': label
     }
 
-    indname=config.get('indname')
-    t=config.get('t')
     print('saving xlsx...')
-    pd.DataFrame(nodes).to_excel(f'src/{config.Delta_t}-Q-nodes-t{t}{indname}1.xlsx')
-    pd.DataFrame(edges).to_excel(f'src/{config.Delta_t}-Q-edges-t{t}{indname}1.xlsx')
+    pd.DataFrame(nodes).to_excel(config.getNodesPath())
+    pd.DataFrame(edges).to_excel(config.getEdgesPath())
 
 if __name__=='__main__':
     QMatPath=config.getQMatPath()

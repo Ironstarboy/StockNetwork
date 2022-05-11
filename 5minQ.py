@@ -41,22 +41,6 @@ def saveQMat(returnMat, filePath, start=0, end=48, tao=1):
         print(f'{filePath}已存在,如需更新请删掉文件，重新运行代码')
 
 
-# Q的直方图
-@myIO.timer
-def plotQ(Q,QMatPath):
-    Delta_t=config.get('Delta_t')
-    m=np.mean(Q)
-    sigma=np.std(Q)
-    print(f'q均值{m:.6f},σ={sigma:.6f}')
-    plt.figure(dpi=800)
-    plt.hist(Q.flatten(), bins=500, facecolor="blue", alpha=0.5)
-    plt.title(myIO.getFileNameExt(QMatPath))
-    plt.ylabel('相关性系数')
-    plt.xlabel('个数')
-
-    outPath = f'out/pic/{Delta_t}'
-    myIO.mkDir(outPath)
-    plt.savefig(f'{outPath}/{myIO.getFileNameExt(QMatPath).split(".")[0]}.png')
 
 
 # 对于不同的τ，Q矩阵的q值降序排序
@@ -129,7 +113,6 @@ Q.fillna(value=m,inplace=True,axis=1)
 
 # 绘制Q的相关图
 Q=Q.values# df转为ndarray
-plotQ(Q,QMatPath)
 plotQtao()
 
 

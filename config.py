@@ -49,3 +49,10 @@ def getQMatPath(tau=get('tau')):
     QMatPath = f'src/var/{Delta_t}/Qm{mkt}s{start}e{end}tau{tau}{indname}.pkl'
     return QMatPath
 
+def getNodesPath():
+    nodesPath=f'src/{Delta_t}-Q-nodes-t{t}{indname}.xlsx'
+    return nodesPath
+
+def getEdgesPath():
+    edgesPath=f'src/{Delta_t}-Q-edges-t{t}{indname}.xlsx'
+    return edgesPath

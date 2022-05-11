@@ -89,10 +89,11 @@ networkx绘图：https://lhyxx.top/2019/10/06/%E7%BB%98%E5%9B%BE%E7%A5%9E%E5%99%
 5. 运行minQ.py文件，根据returnmat,计算出Q值。要注意t的值和returnmat的维度
 6. 运营mat2G.py文件，对q进行granger筛选、大小筛选。将关联矩阵，转化成对应的股票节点表格和边表格
 7. 进行granger检验，边表格进行更新。
-8. gephi里根据边的权重进行筛选，剔除弱关联的边
-9. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
-10. 导出节点和边的属性表格
-11. 根据modularity给节点划分社团。
+8. 运行plotQ.py，绘制筛选后的q矩阵分布。
+9. gephi里根据边的权重进行筛选，剔除弱关联的边
+10. 图的属性运算，计算度，modularity class；布局用XX2布局。把度为0的节点都放在外围，度多的节点放在图中间
+11. 导出节点和边的属性表格
+12. 根据modularity给节点划分社团。
 
 
 
