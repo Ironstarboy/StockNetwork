@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import os
 import config
-
+import math
 # Q的直方图
 @myIO.timer
 def plotQ():
@@ -19,7 +19,7 @@ def plotQ():
     plt.figure(dpi=800)
 
 
-    plt.hist(sorted(qList,reverse=1), bins=500, facecolor="blue", alpha=0.5)
+    plt.hist(qList, bins=100, facecolor="blue", alpha=0.5)
     title=myIO.getFileNameExt(config.getQMatPath()).replace('.pkl','')
     plt.title(title)
     plt.xlabel('相关性系数')

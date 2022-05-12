@@ -51,6 +51,7 @@ def plotQtao():
     indname=config.get('indname')
     plt.figure(dpi=800)
     days=config.get('days')
+    returnMat=myIO.loadVar(config.getQMatPath())
     # TODO 对于不同的tao 可以统计基础的统计变量，比如均值和方差，然后假设检验u1>u2
     for tau in [0,1,2,3,5,6,10]:
         start = 0
@@ -68,7 +69,7 @@ def plotQtao():
         plt.ylabel('相关性系数')
         plt.xlabel('q的序号')
         plt.ylim(0, 1)
-        x=sorted(sample(list(map(lambda x:abs(x),Q.flatten())),10000),reverse=1)
+        x=sorted(sample(list(map(lambda x:abs(x),Q.flatten())),1000),reverse=1)
         plt.plot(x,label=f'{tau}',linewidth=0.5)
     plt.legend()
     plt.title(f'Delta_t={Delta_t}时不同τ的相关性曲线')
@@ -86,35 +87,37 @@ matplotlib.rcParams['font.sans-serif']=['SimHei']   # 用黑体显示中文
 matplotlib.rcParams['axes.unicode_minus']=False     # 正常显示负号
 
 
-mkt=config.get('mkt')
-indname=config.get('indname')
-start=config.get('start')
-t=config.get('t')
-tau=config.get('tau')
+def run():
+    mkt = config.get('mkt')
+    indname = config.get('indname')
+    start = config.get('start')
+    t = config.get('t')
+    tau = config.get('tau')
 
-T= t + tau
-end=T+start
+    T = t + tau
+    end = T + start
+
+    returnMatPath = config.getReturnMatPath()
+    returnMat = myIO.loadVar(returnMatPath)
+
+    QMatPath = config.getQMatPath()
+    saveQMat(returnMat, QMatPath, start, end, tao=tau)
+
+    Q: np.ndarray = myIO.loadVar(QMatPath)
+    m = np.nanmean(Q)
+    Q = pd.DataFrame(Q)
+
+    Q.fillna(value=m, inplace=True, axis=1)
+    # print(Q[Q.isnull().any()])
+    # print(Q[Q.isnull().T.all()])
+
+    # 绘制Q的相关图
+    Q = Q.values  # df转为ndarray
+    # plotQtao()
 
 
-returnMatPath=config.getReturnMatPath()
-returnMat= myIO.loadVar(returnMatPath)
-
-QMatPath=config.getQMatPath()
-saveQMat(returnMat, QMatPath, start, end, tao=tau)
-
-Q:np.ndarray=myIO.loadVar(QMatPath)
-m=np.nanmean(Q)
-Q=pd.DataFrame(Q)
-
-Q.fillna(value=m,inplace=True,axis=1)
-# print(Q[Q.isnull().any()])
-# print(Q[Q.isnull().T.all()])
-
-
-# 绘制Q的相关图
-Q=Q.values# df转为ndarray
-plotQtao()
-
+if __name__=="__main__":
+    run()
 
 
 

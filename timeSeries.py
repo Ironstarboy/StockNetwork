@@ -55,8 +55,8 @@ def adf(ret):
 
 @myIO.timer
 def getNotStionarycd():
-    ...
-    global cdlist
+
+    cdlist=myIO.loadVar(config.getCdlistPath())
     notStaionaryCd=[]
     for cdIndex in tqdm(range(len(cdlist))):
         ret=getRet(cdIndex)
@@ -68,7 +68,7 @@ def getNotStionarycd():
 
 # 单个股票的基本信息输出
 def singleCdInfo(stkcd):
-    global cdlist
+    cdlist=myIO.loadVar(config.getCdlistPath())
     cdIndex=cdlist.index(stkcd)
     ret=getRet(cdIndex)
     plotAcf(ret,stkcd)
@@ -77,29 +77,25 @@ def singleCdInfo(stkcd):
 
 
 
+def fileterNotStaionaryStock():
+    cdlist = myIO.loadVar(config.getCdlistPath())
+    notStaionaryCd = getNotStionarycd()
+    # returnMat去除非平稳的股票
+    returnMat = myIO.loadVar(config.getReturnMatPath())
+    notStaionaryCdIndex = []
+    for cd in notStaionaryCd:
+        cdIndex = cdlist.index(cd)
+        notStaionaryCdIndex.append(cdIndex)
+    returnMat = np.delete(returnMat, notStaionaryCdIndex, axis=1)
+    myIO.loadVar(config.getReturnMatPath())
 
+    for cd in notStaionaryCd:
+        cdlist.remove(cd)
+    myIO.dumpVar(cdlist, config.getCdlistPath())
 
 
 if __name__=="__main__":
-
-    cdlist =myIO.loadVar(config.getCdlistPath())
-    # notStaionaryCd=getNotStionarycd()
-    # #returnMat去除非平稳的股票
-    # returnMat=myIO.loadVar(config.getReturnMatPath())
-    # notStaionaryCdIndex=[]
-    # for cd in notStaionaryCd:
-    #     cdIndex=cdlist.index(cd)
-    #     notStaionaryCdIndex.append(cdIndex)
-    # returnMat=np.delete(returnMat, notStaionaryCdIndex, axis=1)
-    # myIO.loadVar(config.getReturnMatPath())
-    #
-    # for cd in notStaionaryCd:
-    #     cdlist.remove(cd)
-    # myIO.dumpVar(cdlist,config.getCdlistPath())
-
-    ret1=getRet(0)
-    ret2=getRet(1)
-    granger(ret1,ret2)
+    fileterNotStaionaryStock()
 
     # singleCdInfo(600533)
 

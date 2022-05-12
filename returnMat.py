@@ -45,6 +45,6 @@ def getReturnMat(mkt:tuple):
         myIO.dumpVar(cdlist, cdlistPath)
     else:
         print(f'{outPath}已存在,如需更新请删掉文件，重新运行代码')
-
-mkt=config.get('mkt')
-getReturnMat(mkt)
+if __name__=="main__":
+    mkt=config.get('mkt')
+    getReturnMat(mkt)
